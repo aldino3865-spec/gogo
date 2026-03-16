@@ -305,6 +305,20 @@ elif menu == "Mini Game":
 
     st.subheader("Mini Game Sistem Bilangan 🎮")
 
+    difficulty = st.selectbox(
+        "Difficulty",
+        ["Easy", "Medium", "Hard"]
+    )
+
+    mini_menu = st.selectbox(
+        "Pilih Game",
+        ["Conversion Challenge", "Binary Operation"]
+    )
+
+    # =========================
+    # SESSION STATE
+    # =========================
+
     if "score" not in st.session_state:
         st.session_state.score = 0
 
@@ -314,10 +328,169 @@ elif menu == "Mini Game":
     if "wrong" not in st.session_state:
         st.session_state.wrong = 0
 
+    if "question_conv" not in st.session_state:
+        st.session_state.question_conv = None
+
+    if "question_bin" not in st.session_state:
+        st.session_state.question_bin = None
+
+    # =========================
+    # RESET
+    # =========================
+
     if st.button("Reset Score"):
         st.session_state.score = 0
         st.session_state.correct = 0
         st.session_state.wrong = 0
+        st.session_state.question_conv = None
+        st.session_state.question_bin = None
+
+    # =========================
+    # LEVEL SYSTEM
+    # =========================
+
+    level = "Beginner"
+
+    if st.session_state.score >= 5:
+        level = "Binary Explorer"
+
+    if st.session_state.score >= 10:
+        level = "Binary Master"
+
+    if st.session_state.score >= 20:
+        level = "Binary Legend"
+
+    st.success(f"Level : {level}")
+
+    # =========================
+    # GAME 1
+    # =========================
+
+    if mini_menu == "Conversion Challenge":
+
+        if st.session_state.question_conv is None:
+
+            if difficulty == "Easy":
+                num = random.randint(1,50)
+            elif difficulty == "Medium":
+                num = random.randint(1,200)
+            else:
+                num = random.randint(1,500)
+
+            bases = ["Biner","Desimal","Oktal","Hexa"]
+
+            from_base = random.choice(bases)
+            to_base = random.choice(bases)
+
+            while from_base == to_base:
+                to_base = random.choice(bases)
+
+            value = num
+
+            if from_base == "Biner":
+                value = format(num,'b')
+
+            elif from_base == "Oktal":
+                value = format(num,'o')
+
+            elif from_base == "Hexa":
+                value = format(num,'X')
+
+            st.session_state.question_conv = (num,value,from_base,to_base)
+
+        num,value,from_base,to_base = st.session_state.question_conv
+
+        st.info(f"Convert **{value} ({from_base}) → {to_base}**")
+
+        ans = st.text_input("Jawaban")
+
+        if st.button("Submit Answer"):
+
+            correct = num
+
+            if to_base == "Biner":
+                correct = format(num,'b')
+
+            elif to_base == "Oktal":
+                correct = format(num,'o')
+
+            elif to_base == "Hexa":
+                correct = format(num,'X')
+
+            if str(ans).upper() == str(correct):
+
+                st.balloons()
+                st.success("Benar! 🎉")
+                st.session_state.score += 1
+                st.session_state.correct += 1
+
+            else:
+
+                st.error(f"Salah! Jawaban benar: {correct}")
+                st.session_state.wrong += 1
+
+            st.session_state.question_conv = None
+
+        if st.button("Next Question"):
+            st.session_state.question_conv = None
+
+    # =========================
+    # GAME 2
+    # =========================
+
+    elif mini_menu == "Binary Operation":
+
+        if st.session_state.question_bin is None:
+
+            a = random.randint(1,15)
+            b = random.randint(1,15)
+
+            op = random.choice(["AND","OR","XOR"])
+
+            st.session_state.question_bin = (a,b,op)
+
+        a,b,op = st.session_state.question_bin
+
+        bin_a = format(a,'b')
+        bin_b = format(b,'b')
+
+        st.info(f"{bin_a} {op} {bin_b} = ?")
+
+        ans = st.text_input("Jawaban biner")
+
+        if st.button("Submit Answer"):
+
+            if op == "AND":
+                correct = format(a & b,'b')
+
+            elif op == "OR":
+                correct = format(a | b,'b')
+
+            else:
+                correct = format(a ^ b,'b')
+
+            if ans == correct:
+
+                st.balloons()
+                st.success("Benar! 🎉")
+                st.session_state.score += 1
+                st.session_state.correct += 1
+
+            else:
+
+                st.error(f"Salah! Jawaban benar: {correct}")
+                st.session_state.wrong += 1
+
+            st.session_state.question_bin = None
+
+        if st.button("Next Question"):
+            st.session_state.question_bin = None
+
+    # =========================
+    # SCOREBOARD
+    # =========================
+
+    st.divider()
 
     col1,col2,col3 = st.columns(3)
 
@@ -329,6 +502,5 @@ elif menu == "Mini Game":
 
     with col3:
         st.metric("Salah",st.session_state.wrong)
-
 st.divider()
 st.caption("Number System Calculator • Kelompok 4")
