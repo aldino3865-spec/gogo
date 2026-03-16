@@ -140,23 +140,57 @@ elif menu == "BCD":
 
     bil = st.text_input("Masukkan bilangan")
 
+    # pilihan kode jika input BCD
+    kode = None
+    if jenis == "BCD":
+        kode = st.selectbox(
+            "Jenis Kode BCD",
+            ["8421", "2421", "5421", "Excess-3"]
+        )
+
     if st.button("Konversi"):
 
         try:
 
-            # BCD ke Desimal
+            # =========================
+            # BCD -> DESIMAL
+            # =========================
             if jenis == "BCD":
 
                 digits = bil.split()
                 desimal = ""
 
+                tabel2421 = {
+                    "0000":"0","0001":"1","0010":"2","0011":"3","0100":"4",
+                    "1011":"5","1100":"6","1101":"7","1110":"8","1111":"9"
+                }
+
+                tabel5421 = {
+                    "0000":"0","0001":"1","0010":"2","0011":"3","0100":"4",
+                    "1000":"5","1001":"6","1010":"7","1011":"8","1100":"9"
+                }
+
                 for d in digits:
-                    desimal += str(int(d,2))
+
+                    if kode == "8421":
+                        desimal += str(int(d,2))
+
+                    elif kode == "2421":
+                        desimal += tabel2421[d]
+
+                    elif kode == "5421":
+                        desimal += tabel5421[d]
+
+                    elif kode == "Excess-3":
+                        desimal += str(int(d,2)-3)
 
                 desimal = int(desimal)
 
-                st.info(f"BCD dikonversi ke Desimal : {desimal}")
+                st.success(f"Desimal : {desimal}")
 
+            # =========================
+            # BASIS LAIN -> DESIMAL
+            # =========================
             else:
 
                 desimal = int(bil, base_map[jenis])
@@ -166,10 +200,14 @@ elif menu == "BCD":
 
             des_str = str(desimal)
 
-            # BCD 8421
+            # =========================
+            # 8421
+            # =========================
             bcd = " ".join(format(int(i),'04b') for i in des_str)
 
+            # =========================
             # 2421
+            # =========================
             tabel2421 = {
                 "0":"0000","1":"0001","2":"0010","3":"0011","4":"0100",
                 "5":"1011","6":"1100","7":"1101","8":"1110","9":"1111"
@@ -177,7 +215,9 @@ elif menu == "BCD":
 
             code2421 = " ".join(tabel2421[i] for i in des_str)
 
+            # =========================
             # 5421
+            # =========================
             tabel5421 = {
                 "0":"0000","1":"0001","2":"0010","3":"0011","4":"0100",
                 "5":"1000","6":"1001","7":"1010","8":"1011","9":"1100"
@@ -185,10 +225,14 @@ elif menu == "BCD":
 
             code5421 = " ".join(tabel5421[i] for i in des_str)
 
+            # =========================
             # Excess 3
+            # =========================
             excess3 = " ".join(format(int(i)+3,'04b') for i in des_str)
 
+            # =========================
             # Gray Code
+            # =========================
             biner = format(desimal,'b')
 
             gray = biner[0]
